@@ -24,7 +24,7 @@ class TextCleaner {
   }
 
   /// Converts a phoneme string to a list of token IDs
-  ///  Unknown characters are instantly fixed.
+  ///  Unknown characters are instantly ignored.
 
   List<int> encode(String phonemes) {
     final tokens = <int>[];

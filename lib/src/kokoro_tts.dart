@@ -44,6 +44,7 @@ class KokoroTts {
 
   OrtSession? _session;
   bool _isInitialized = false;
+  Future<void>? _initializing;
 
   /// Output sample rate (always 24 000 Hz)
   int sampleRate = 24000;
@@ -54,35 +55,46 @@ class KokoroTts {
   /// Voice cache
   final Map<String, Float32List> _voiceCache = {};
 
-  /// Intialize the Kokoro TTS engine.
-  Future<void> initialize({
-    void Function(double progress, String status)? onProgress,
-  }) async {
-    if (_isInitialized) return;
+  /// Initialize the Kokoro TTS engine.
+Future<void> initialize({
+  void Function(double progress, String status)? onProgress,
+}) {
+  // If already initialized → return completed future
+  if (_isInitialized) return Future.value();
 
+  // If initialization is in progress → return same future
+  if (_initializing != null) return _initializing!;
+
+  _initializing = _doInitialize(onProgress);
+
+  return _initializing!;
+}
+
+  Future<void> _doInitialize(
+  void Function(double progress, String status)? onProgress,
+) async {
+  try {
     onProgress?.call(0.0, 'Downloading model...');
 
-    // 1. Download the model + voices + espeak data
     await _modelManager.download(
       onProgress: (p, status) {
         onProgress?.call(p, status);
       },
     );
 
-    // 2. Initialize the phonemizer
     _phonemizer.initialize(dataPath: _modelManager.modelDir);
-
-    // 3. Load ONNX session
 
     onProgress?.call(0.97, 'Loading ONNX session...');
     final ort = OnnxRuntime();
     _session = await ort.createSession(_modelManager.modelPath);
-    debugPrint('[kokoroTTS]: session inputs ${_session?.inputNames}');
-    debugPrint('[kokoroTTS]: session outputs ${_session?.outputNames}');
 
     _isInitialized = true;
     onProgress?.call(1.0, 'Ready');
+  } catch (e) {
+    _initializing = null; // allow retry if failed
+    rethrow;
   }
+}
 
   Future<Float32List> _getVoice(String voice) async {
     if (_voiceCache.containsKey(voice)) {
@@ -103,7 +115,7 @@ class KokoroTts {
     String voice = 'Default',
     double speed = 1.0,
   }) async {
-    if (!_isInitialized) throw Exception('Kokoro TTS not initialized');
+    await initialize(); 
 
     final chunks = _splitIntoChunks(text);
     final parts = <Float32List>[];
