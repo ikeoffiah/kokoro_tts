@@ -131,7 +131,7 @@ class EspeakFfi {
   }
 
   void dispose() {
-    if (!_ready) {
+    if (_ready) {
       _espeakTerminate!.call();
       _ready = false;
     }
