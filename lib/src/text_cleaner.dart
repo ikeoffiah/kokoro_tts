@@ -23,31 +23,30 @@ class TextCleaner {
     }
   }
 
-/// Converts a phoneme string to a list of token IDs
-///  Unknown characters are instantly fixed.
+  /// Converts a phoneme string to a list of token IDs
+  ///  Unknown characters are instantly fixed.
 
-List<int> encode(String phonemes){
-  final tokens = <int>[];
-  for (final char in phonemes.characters){
-    final idx = _charToIndex[char];
-    if (idx != null) tokens.add(idx);
+  List<int> encode(String phonemes) {
+    final tokens = <int>[];
+    for (final char in phonemes.characters) {
+      final idx = _charToIndex[char];
+      if (idx != null) tokens.add(idx);
+    }
+    return tokens;
   }
-  return tokens;
+
+  /// Encodes phonemes and wraps with start/end padding tokens (0)
+  List<int> encodeAndWrap(String phonemes) {
+    return [0, ...encode(phonemes), 0];
+  }
 }
 
-/// Encodes phonemes and wraps with start/end padding tokens (0)
-List<int> encodeAndWrap(String phonemes){
-  return [0, ...encode(phonemes), 0];
-}
-
-
-}
 /// Extension to iterate over grapheme clusters (important for multi-byte chars)
-extension _StringCharacters on String{
-  List<String> get characters{
+extension _StringCharacters on String {
+  List<String> get characters {
     final result = <String>[];
     final runes = this.runes.toList();
-    for (final rune in runes){
+    for (final rune in runes) {
       result.add(String.fromCharCode(rune));
     }
     return result;
