@@ -298,5 +298,26 @@ Future<void> initialize({
   // static String _trunc(String s, [int n = 60]) =>
   //     s.length <= n ? s : '${s.substring(0, n)}…';
 
+  Future<void> dispose() async {
+    if(!_isInitialized) return;
+
+    // Dispose ONNX session
+    if(_session != null) {
+      await _session!.close();
+      _session = null;
+    }
+
+    // Dispose phonemizer
+    _phonemizer.dispose();
+
+    // clear voice cache
+    _voiceCache.clear();
+
+
+    _isInitialized = false;
+    _initializing = null;
+
+  }
+
 
 }
