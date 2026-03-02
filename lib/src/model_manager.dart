@@ -86,7 +86,7 @@ class KokoroModelManager {
         received += chunk.length;
         if (total > 0) onProgress?.call(received / total);
       }
-      await await sink.close();
+      await sink.close();
     } catch (e) {
       throw Exception('Failed to download $url: $e');
     } finally {
