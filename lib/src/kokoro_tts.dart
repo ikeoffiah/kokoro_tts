@@ -27,12 +27,12 @@ const Map<String, String> _kokoroVoiceMap = {
 };
 
 const Map<String, double> _speedPriors = {
-  'af.bin': 0.8,
-  'af_bella.bin': 0.8,
-  'af_nicole.bin': 0.8,
-  'af_sarah.bin': 0.8,
-  'am_adam.bin': 0.8,
-  'am_michael.bin': 0.8,
+  'Default': 0.8,
+  'Bella': 0.8,
+  'Nicole': 0.8,
+  'Sarah': 0.8,
+  'Adam': 0.8,
+  'Michael': 0.8,
 };
 
 class KokoroTts {
@@ -76,9 +76,9 @@ class KokoroTts {
 
     onProgress?.call(0.97, 'Loading ONNX session...');
     final ort = OnnxRuntime();
-    final session = await ort.createSession(_modelManager.modelPath);
-    debugPrint('[kokoroTTS]: session inputs ${session.inputNames}');
-    debugPrint('[kokoroTTS]: session outputs ${session.outputNames}');
+    _session = await ort.createSession(_modelManager.modelPath);
+    debugPrint('[kokoroTTS]: session inputs ${_session?.inputNames}');
+    debugPrint('[kokoroTTS]: session outputs ${_session?.outputNames}');
 
     _isInitialized = true;
     onProgress?.call(1.0, 'Ready');
@@ -286,5 +286,5 @@ class KokoroTts {
   // static String _trunc(String s, [int n = 60]) =>
   //     s.length <= n ? s : '${s.substring(0, n)}…';
 
-  Future<void> dispose() async {}
+
 }
