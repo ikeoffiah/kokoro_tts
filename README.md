@@ -28,7 +28,7 @@ flutter pub get
 ### Requirements
 
 - **Flutter** — SDK 3.10+
-- **Android** — minSdk 21+ (plugin uses NDK/CMake for native code)
+- **Android** — minSdk 21+ (plugin uses NDK/CMake for native code). Install **CMake** and **NDK** via Android Studio → SDK Manager → SDK Tools if you see a CMake-not-found error.
 - **iOS** — iOS 11.0+
 
 On first use, the plugin downloads the Kokoro ONNX model and voice files from Hugging Face (~50 MB). Ensure the app has network and storage permissions as needed.

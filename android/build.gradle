@@ -58,7 +58,8 @@ android {
     externalNativeBuild {
         cmake {
             path "src/main/CMakeLists.txt"
-            version "3.18.1"
+            // Omit version so AGP uses SDK CMake (SDK Manager → SDK Tools → CMake).
+            // CMakeLists.txt requires 3.18+; any SDK-bundled CMake is compatible.
         }
     }
 
