@@ -38,7 +38,7 @@ class TtsExamplePage extends StatefulWidget {
 class _TtsExamplePageState extends State<TtsExamplePage> {
   final KokoroTts _tts = KokoroTts();
   final TextEditingController _textController = TextEditingController(
-    text: 'Hello! This is Kokoro text to speech.',
+    text: 'Hello! This app uses Kokoro text to speech.',
   );
   final AudioPlayer _player = AudioPlayer();
 
@@ -47,6 +47,7 @@ class _TtsExamplePageState extends State<TtsExamplePage> {
   String? _status;
   double _progress = 0;
   Float32List? _audio;
+  String? _wavPath; // Pre-written .wav so Play works on iOS (BytesSource not reliable there)
   String? _error;
 
   @override
@@ -70,6 +71,7 @@ class _TtsExamplePageState extends State<TtsExamplePage> {
     setState(() {
       _error = null;
       _audio = null;
+      _wavPath = null;
       _isGenerating = true;
       _status = 'Initializing...';
       _progress = 0;
@@ -97,8 +99,14 @@ class _TtsExamplePageState extends State<TtsExamplePage> {
       );
 
       if (!mounted) return;
+      final wavBytes = _buildWavBytes(audio, _tts.sampleRate);
+      final dir = await getTemporaryDirectory();
+      final path = '${dir.path}/kokoro_example.wav';
+      await File(path).writeAsBytes(wavBytes);
+      if (!mounted) return;
       setState(() {
         _audio = audio;
+        _wavPath = path;
         _isGenerating = false;
         _status = null;
         _progress = 0;
@@ -115,13 +123,10 @@ class _TtsExamplePageState extends State<TtsExamplePage> {
   }
 
   Future<void> _play() async {
-    final audio = _audio;
-    if (audio == null || audio.isEmpty) return;
+    final path = _wavPath;
+    if (path == null || path.isEmpty) return;
 
     try {
-      final dir = await getTemporaryDirectory();
-      final path = '${dir.path}/kokoro_example.wav';
-      await _writeWav(path, audio, _tts.sampleRate);
       await _player.play(DeviceFileSource(path));
     } catch (e) {
       if (mounted) {
@@ -130,49 +135,49 @@ class _TtsExamplePageState extends State<TtsExamplePage> {
     }
   }
 
-  /// Writes 16-bit mono WAV file from Float32List (-1..1) at [sampleRate].
-  static Future<void> _writeWav(
-    String path,
-    Float32List samples,
-    int sampleRate,
-  ) async {
+  /// Build WAV bytes and pre-write to file so Play works on iOS (file with .wav extension).
+  static Uint8List _buildWavBytes(Float32List samples, int sampleRate) {
     final numSamples = samples.length;
-    final dataLen = numSamples * 2; // 16-bit = 2 bytes per sample
+    final dataLen = numSamples * 2;
     const headerLen = 44;
-    final file = File(path);
-    final sink = file.openWrite();
+    final total = headerLen + dataLen;
+    final out = Uint8List(total);
+    var offset = 0;
 
-    // WAV header (44 bytes)
-    sink.add('RIFF'.codeUnits);
-    sink.add(_uint32ToBytes(headerLen - 8 + dataLen));
-    sink.add('WAVE'.codeUnits);
-    sink.add('fmt '.codeUnits);
-    sink.add(_uint32ToBytes(16)); // chunk size
-    sink.add(_uint16ToBytes(1)); // PCM
-    sink.add(_uint16ToBytes(1)); // mono
-    sink.add(_uint32ToBytes(sampleRate));
-    sink.add(_uint32ToBytes(sampleRate * 2)); // byte rate
-    sink.add(_uint16ToBytes(2)); // block align
-    sink.add(_uint16ToBytes(16)); // bits per sample
-    sink.add('data'.codeUnits);
-    sink.add(_uint32ToBytes(dataLen));
+    void add(List<int> bytes) {
+      for (var i = 0; i < bytes.length; i++) {
+        out[offset++] = bytes[i];
+      }
+    }
+
+    add('RIFF'.codeUnits);
+    add(_uint32ToBytes(headerLen - 8 + dataLen));
+    add('WAVE'.codeUnits);
+    add('fmt '.codeUnits);
+    add(_uint32ToBytes(16));
+    add(_uint16ToBytes(1));
+    add(_uint16ToBytes(1));
+    add(_uint32ToBytes(sampleRate));
+    add(_uint32ToBytes(sampleRate * 2));
+    add(_uint16ToBytes(2));
+    add(_uint16ToBytes(16));
+    add('data'.codeUnits);
+    add(_uint32ToBytes(dataLen));
 
     for (var i = 0; i < numSamples; i++) {
       var s = samples[i];
       if (s > 1) s = 1;
       if (s < -1) s = -1;
       final int16 = (s * 32767).round();
-      sink.add(_int16ToBytes(int16));
+      add(_int16ToBytes(int16));
     }
-
-    await sink.close();
+    return out;
   }
 
   static List<int> _uint32ToBytes(int v) =>
       [v & 0xff, (v >> 8) & 0xff, (v >> 16) & 0xff, (v >> 24) & 0xff];
   static List<int> _uint16ToBytes(int v) => [v & 0xff, (v >> 8) & 0xff];
-  static List<int> _int16ToBytes(int v) =>
-      [v & 0xff, (v >> 8) & 0xff]; // little-endian
+  static List<int> _int16ToBytes(int v) => [v & 0xff, (v >> 8) & 0xff];
 
   @override
   Widget build(BuildContext context) {
@@ -197,7 +202,7 @@ class _TtsExamplePageState extends State<TtsExamplePage> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              initialValue: _selectedVoice,
+              value: _selectedVoice,
               decoration: const InputDecoration(
                 labelText: 'Voice',
                 border: OutlineInputBorder(),
@@ -231,7 +236,10 @@ class _TtsExamplePageState extends State<TtsExamplePage> {
                 ),
                 const SizedBox(width: 12),
                 FilledButton.tonal(
-                  onPressed: (_audio != null && _audio!.isNotEmpty && !_isGenerating)
+                  onPressed: (_wavPath != null &&
+                          _audio != null &&
+                          _audio!.isNotEmpty &&
+                          !_isGenerating)
                       ? _play
                       : null,
                   child: const Text('Play'),
