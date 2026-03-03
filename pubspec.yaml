@@ -1,7 +1,17 @@
 name: flutter_kokoro_tts
-description: "A new Flutter package project."
+description: On-device Kokoro TTS for Flutter — high-quality text-to-speech using ONNX and espeak-ng, with multiple voices. No cloud API required.
 version: 0.0.1
-homepage:
+homepage: https://github.com/ikeoffiah/kokoro_tts
+repository: https://github.com/ikeoffiah/kokoro_tts
+issue_tracker: https://github.com/ikeoffiah/kokoro_tts/issues
+documentation: https://github.com/ikeoffiah/kokoro_tts#readme
+license: MIT
+topics:
+  - text-to-speech
+  - tts
+  - kokoro
+  - onnx
+  - speech-synthesis
 
 environment:
   sdk: ^3.10.8
