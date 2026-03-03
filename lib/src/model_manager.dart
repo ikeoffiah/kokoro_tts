@@ -66,33 +66,61 @@ class KokoroModelManager {
     onProgress?.call(1.0, 'Ready');
   }
 
-  Future<void> _downloadFile({
-    required String url,
-    required String destination,
-    required void Function(double progress)? onProgress,
-  }) async {
-    if (File(destination).existsSync()) return;
-    final client = http.Client();
-    try {
-      final response = await client.send(http.Request('GET', Uri.parse(url)));
+Future<void> _downloadFile({
+  required String url,
+  required String destination,
+  required void Function(double progress)? onProgress,
+}) async {
+  final file = File(destination);
+  if (file.existsSync()) return;
 
-      final total = response.contentLength ?? 0;
-      final file = File(destination);
-      final sink = file.openWrite();
-      var received = 0;
+  final tempPath = '$destination.part';
+  final tempFile = File(tempPath);
 
-      await for (final chunk in response.stream) {
-        sink.add(chunk);
-        received += chunk.length;
-        if (total > 0) onProgress?.call(received / total);
-      }
-      await sink.close();
-    } catch (e) {
-      throw Exception('Failed to download $url: $e');
-    } finally {
-      client.close();
+  final client = http.Client();
+
+  try {
+    final response = await client.send(
+      http.Request('GET', Uri.parse(url)),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('HTTP ${response.statusCode}');
     }
+
+    final total = response.contentLength ?? 0;
+    final sink = tempFile.openWrite();
+
+    var received = 0;
+
+    await for (final chunk in response.stream) {
+      sink.add(chunk);
+      received += chunk.length;
+
+      if (total > 0) {
+        onProgress?.call(received / total);
+      }
+    }
+
+    await sink.close();
+
+    // Optional integrity check
+    if (total > 0 && received != total) {
+      throw Exception('Incomplete download');
+    }
+
+    // Atomic rename
+    await tempFile.rename(destination);
+
+  } catch (e) {
+    if (tempFile.existsSync()) {
+      await tempFile.delete();
+    }
+    rethrow;
+  } finally {
+    client.close();
   }
+}
 
   Future<Directory> _getModelDir() async {
     if (_modelDir != null) return Directory(_modelDir!);
