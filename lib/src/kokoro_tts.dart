@@ -56,33 +56,45 @@ class KokoroTts {
   final Map<String, Float32List> _voiceCache = {};
 
   /// Initialize the Kokoro TTS engine.
-Future<void> initialize({
-  void Function(double progress, String status)? onProgress,
-}) {
-  // If already initialized → return completed future
-  if (_isInitialized) return Future.value();
+  ///
+  /// [espeakDataPath] Optional. Directory that contains espeak-ng-data (with
+  /// phontab, etc.), or the espeak-ng-data directory itself. If null, uses
+  /// the kokoro base dir (parent of the model dir); you must place
+  /// espeak-ng-data there or pass a valid path. See README for obtaining data.
+  Future<void> initialize({
+    void Function(double progress, String status)? onProgress,
+    String? espeakDataPath,
+  }) {
+    // If already initialized → return completed future
+    if (_isInitialized) return Future.value();
 
-  // If initialization is in progress → return same future
-  if (_initializing != null) return _initializing!;
+    // If initialization is in progress → return same future
+    if (_initializing != null) return _initializing!;
 
-  _initializing = _doInitialize(onProgress);
+    _initializing = _doInitialize(onProgress, espeakDataPath);
 
-  return _initializing!;
-}
+    return _initializing!;
+  }
 
   Future<void> _doInitialize(
-  void Function(double progress, String status)? onProgress,
-) async {
-  try {
-    onProgress?.call(0.0, 'Downloading model...');
+    void Function(double progress, String status)? onProgress,
+    String? espeakDataPath,
+  ) async {
+    try {
+      onProgress?.call(0.0, 'Downloading model...');
 
-    await _modelManager.download(
-      onProgress: (p, status) {
-        onProgress?.call(p, status);
-      },
-    );
+      await _modelManager.download(
+        onProgress: (p, status) {
+          onProgress?.call(p, status);
+        },
+      );
 
-    _phonemizer.initialize(dataPath: _modelManager.modelDir);
+      if (espeakDataPath == null) {
+        onProgress?.call(0.9, 'Ensuring espeak-ng data...');
+        await _modelManager.ensureEspeakData();
+      }
+      final dataPath = espeakDataPath ?? _modelManager.kokoroBaseDir;
+      _phonemizer.initialize(dataPath: dataPath);
 
     onProgress?.call(0.97, 'Loading ONNX session...');
     final ort = OnnxRuntime();

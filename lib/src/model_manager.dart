@@ -1,7 +1,11 @@
 import 'dart:io';
+
+import 'package:archive/archive.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+
 import 'integrity_verifier.dart';
 
 class KokoroModelManager {
@@ -32,6 +36,48 @@ class KokoroModelManager {
 
   String get modelDir => _modelDir ?? '';
   String get modelPath => p.join(modelDir, 'model_quantized.onnx');
+
+  /// Base directory for kokoro assets (parent of [modelDir]). Use this as
+  /// the path for espeak-ng when espeak-ng-data is placed next to the model.
+  String get kokoroBaseDir {
+    if (_modelDir == null || _modelDir!.isEmpty) return '';
+    final dir = Directory(_modelDir!);
+    return dir.parent.path;
+  }
+
+  static const _espeakDataAssetKey =
+      'packages/flutter_kokoro_tts/assets/espeak_ng_data.zip';
+
+  /// Ensures espeak-ng-data exists under [kokoroBaseDir]. If not present,
+  /// tries to extract from the package asset zip (when available).
+  /// Does nothing if [kokoroBaseDir] is empty or if espeak-ng-data/phontab already exists.
+  Future<void> ensureEspeakData() async {
+    final base = kokoroBaseDir;
+    if (base.isEmpty) return;
+    final phontabPath = p.join(base, 'espeak-ng-data', 'phontab');
+    if (File(phontabPath).existsSync()) return;
+    try {
+      final data = await rootBundle.load(_espeakDataAssetKey);
+      final bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+      final archive = ZipDecoder().decodeBytes(bytes);
+      final targetDir = Directory(base);
+      if (!targetDir.existsSync()) targetDir.createSync(recursive: true);
+      for (final file in archive) {
+        final name = file.name.replaceAll('\\', '/').trim();
+        if (name.isEmpty) continue;
+        final path = p.join(base, name);
+        if (file.isFile) {
+          final out = File(path);
+          out.parent.createSync(recursive: true);
+          out.writeAsBytesSync(file.content as List<int>);
+        } else {
+          Directory(path).createSync(recursive: true);
+        }
+      }
+    } catch (_) {
+      // Asset missing or invalid; phonemizer will throw with clear message
+    }
+  }
 
   Future<bool> isReady() async {
     final dir = await _getModelDir();

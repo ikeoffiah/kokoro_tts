@@ -33,6 +33,8 @@ flutter pub get
 
 On first use, the plugin downloads the Kokoro ONNX model and voice files from Hugging Face (~50 MB). Ensure the app has network and storage permissions as needed.
 
+**espeak-ng data** — Phonemization requires the espeak-ng data files (e.g. `phontab`, `phonindex`, `phondata`) in a directory named `espeak-ng-data`. By default the plugin looks for `.../kokoro/espeak-ng-data` next to the model. You must either (1) build from the package’s `third_party/espeak-ng` (run `make` or CMake, then copy the generated `espeak-ng-data` folder to your app’s kokoro dir or bundle it and pass `espeakDataPath`), or (2) pass a custom path via `initialize(espeakDataPath: ...)`. Run `./scripts/build_espeak_data.sh` (Docker or cmake) to generate **assets/espeak_ng_data.zip**, or pass `espeakDataPath`. See [scripts/README_espeak_data.md](scripts/README_espeak_data.md).
+
 ## Usage
 
 ```dart
@@ -41,8 +43,10 @@ import 'package:flutter_kokoro_tts/flutter_kokoro_tts.dart';
 final tts = KokoroTts();
 
 // Optional: initialize early with progress callback (e.g. for a loading UI)
+// Pass espeakDataPath if your espeak-ng-data is not in the default kokoro dir.
 await tts.initialize(
   onProgress: (progress, status) => print('$status ${(progress * 100).round()}%'),
+  espeakDataPath: null,  // or path to dir containing espeak-ng-data
 );
 
 // Generate audio (initializes automatically if needed)
@@ -66,7 +70,7 @@ await tts.dispose();
 |--------|-------------|
 | `availableVoices` | List of voice names (e.g. `Default`, `Bella`, `Nicole`, `Sarah`, `Adam`, `Michael`) |
 | `sampleRate` | Output sample rate (24000) |
-| `initialize({onProgress})` | Downloads model/voices if needed; safe to call multiple times |
+| `initialize({onProgress, espeakDataPath})` | Downloads model/voices if needed; optional path to espeak-ng-data dir |
 | `generate(text, {voice, speed})` | Returns `Future<Float32List>` PCM mono at 24 kHz |
 | `dispose()` | Closes ONNX session and releases native resources |
 
