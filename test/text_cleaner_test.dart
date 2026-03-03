@@ -33,7 +33,9 @@ void main() {
 
     test('unknown characters are dropped (not encoded)', () {
       // Use a character that is not in the symbol set (e.g. some Unicode that's not IPA/punctuation/letter)
-      final tokens = textCleaner.encode('a\u0000b'); // null char is likely not in set
+      final tokens = textCleaner.encode(
+        'a\u0000b',
+      ); // null char is likely not in set
       // At least 'a' and 'b' should be present; null might be dropped
       expect(tokens, isNotEmpty);
     });

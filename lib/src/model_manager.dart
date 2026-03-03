@@ -58,7 +58,10 @@ class KokoroModelManager {
     if (File(phontabPath).existsSync()) return;
     try {
       final data = await rootBundle.load(_espeakDataAssetKey);
-      final bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+      final bytes = data.buffer.asUint8List(
+        data.offsetInBytes,
+        data.lengthInBytes,
+      );
       final archive = ZipDecoder().decodeBytes(bytes);
       final targetDir = Directory(base);
       if (!targetDir.existsSync()) targetDir.createSync(recursive: true);

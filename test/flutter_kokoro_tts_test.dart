@@ -25,11 +25,14 @@ void main() {
       }
     });
 
-    test('generate with empty string returns empty audio without initializing', () async {
-      final tts = KokoroTts();
-      final audio = await tts.generate('');
-      expect(audio, isEmpty);
-    });
+    test(
+      'generate with empty string returns empty audio without initializing',
+      () async {
+        final tts = KokoroTts();
+        final audio = await tts.generate('');
+        expect(audio, isEmpty);
+      },
+    );
 
     test('generate with whitespace-only string returns empty audio', () async {
       final tts = KokoroTts();
@@ -50,23 +53,36 @@ void main() {
 
     test('all expected default voices are present', () {
       final tts = KokoroTts();
-      const expected = ['Default', 'Bella', 'Nicole', 'Sarah', 'Adam', 'Michael'];
+      const expected = [
+        'Default',
+        'Bella',
+        'Nicole',
+        'Sarah',
+        'Adam',
+        'Michael',
+      ];
       for (final name in expected) {
         expect(tts.availableVoices, contains(name));
       }
     });
 
     // Requires model download; run with: flutter test --run-skipped
-    test('generate with invalid voice throws Exception with "Invalid voice"', () async {
-      final tts = KokoroTts();
-      await expectLater(
-        tts.generate('hello', voice: 'NonExistentVoice'),
-        throwsA(isA<Exception>().having(
-          (e) => e.toString(),
-          'message',
-          contains('Invalid voice'),
-        )),
-      );
-    }, skip: 'Integration: requires network and model download');
+    test(
+      'generate with invalid voice throws Exception with "Invalid voice"',
+      () async {
+        final tts = KokoroTts();
+        await expectLater(
+          tts.generate('hello', voice: 'NonExistentVoice'),
+          throwsA(
+            isA<Exception>().having(
+              (e) => e.toString(),
+              'message',
+              contains('Invalid voice'),
+            ),
+          ),
+        );
+      },
+      skip: 'Integration: requires network and model download',
+    );
   });
 }

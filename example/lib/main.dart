@@ -47,7 +47,8 @@ class _TtsExamplePageState extends State<TtsExamplePage> {
   String? _status;
   double _progress = 0;
   Float32List? _audio;
-  String? _wavPath; // Pre-written .wav so Play works on iOS (BytesSource not reliable there)
+  String?
+  _wavPath; // Pre-written .wav so Play works on iOS (BytesSource not reliable there)
   String? _error;
 
   @override
@@ -174,8 +175,12 @@ class _TtsExamplePageState extends State<TtsExamplePage> {
     return out;
   }
 
-  static List<int> _uint32ToBytes(int v) =>
-      [v & 0xff, (v >> 8) & 0xff, (v >> 16) & 0xff, (v >> 24) & 0xff];
+  static List<int> _uint32ToBytes(int v) => [
+    v & 0xff,
+    (v >> 8) & 0xff,
+    (v >> 16) & 0xff,
+    (v >> 24) & 0xff,
+  ];
   static List<int> _uint16ToBytes(int v) => [v & 0xff, (v >> 8) & 0xff];
   static List<int> _int16ToBytes(int v) => [v & 0xff, (v >> 8) & 0xff];
 
@@ -236,7 +241,8 @@ class _TtsExamplePageState extends State<TtsExamplePage> {
                 ),
                 const SizedBox(width: 12),
                 FilledButton.tonal(
-                  onPressed: (_wavPath != null &&
+                  onPressed:
+                      (_wavPath != null &&
                           _audio != null &&
                           _audio!.isNotEmpty &&
                           !_isGenerating)

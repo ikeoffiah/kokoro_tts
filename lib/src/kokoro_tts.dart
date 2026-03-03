@@ -96,17 +96,17 @@ class KokoroTts {
       final dataPath = espeakDataPath ?? _modelManager.kokoroBaseDir;
       _phonemizer.initialize(dataPath: dataPath);
 
-    onProgress?.call(0.97, 'Loading ONNX session...');
-    final ort = OnnxRuntime();
-    _session = await ort.createSession(_modelManager.modelPath);
+      onProgress?.call(0.97, 'Loading ONNX session...');
+      final ort = OnnxRuntime();
+      _session = await ort.createSession(_modelManager.modelPath);
 
-    _isInitialized = true;
-    onProgress?.call(1.0, 'Ready');
-  } catch (e) {
-    _initializing = null; // allow retry if failed
-    rethrow;
+      _isInitialized = true;
+      onProgress?.call(1.0, 'Ready');
+    } catch (e) {
+      _initializing = null; // allow retry if failed
+      rethrow;
+    }
   }
-}
 
   Future<Float32List> _getVoice(String voice) async {
     if (_voiceCache.containsKey(voice)) {
@@ -223,7 +223,9 @@ class KokoroTts {
       tokenLen * styleDim,
       (tokenLen + 1) * styleDim,
     );
-    debugPrint('[kokoroTTS]: style embedding: ${style.length} (row $tokenLen of $numVectors)');
+    debugPrint(
+      '[kokoroTTS]: style embedding: ${style.length} (row $tokenLen of $numVectors)',
+    );
 
     // -- Speed Adjustment --
     final speedFactor = _speedPriors[voice]!;
@@ -330,10 +332,10 @@ class KokoroTts {
   //     s.length <= n ? s : '${s.substring(0, n)}…';
 
   Future<void> dispose() async {
-    if(!_isInitialized) return;
+    if (!_isInitialized) return;
 
     // Dispose ONNX session
-    if(_session != null) {
+    if (_session != null) {
       await _session!.close();
       _session = null;
     }
@@ -344,11 +346,7 @@ class KokoroTts {
     // clear voice cache
     _voiceCache.clear();
 
-
     _isInitialized = false;
     _initializing = null;
-
   }
-
-
 }
