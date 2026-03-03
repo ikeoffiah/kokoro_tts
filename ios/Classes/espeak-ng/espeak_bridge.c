@@ -5,7 +5,7 @@
  * Called from Swift to prevent the linker from stripping
  * these symbols when building a static framework.
  */
-void kitten_tts_force_link_espeak(void) {
+void flutter_kokoro_tts_force_link_espeak(void) {
     volatile void *p;
     p = (void *)espeak_Initialize;
     p = (void *)espeak_SetVoiceByName;

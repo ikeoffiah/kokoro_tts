@@ -1,7 +1,7 @@
 /// Preprocesses raw text for TTS: expands numbers, abbreviations, currency,
 /// time expressions, etc. into speakable words.
 ///
-/// Ported from KittenTTS Python source (kittentts/preprocess.py).
+/// Ported from KokoroTTS Python source (kokorotts/preprocess.py).
 class TextPreprocessor {
   String process(String text) {
     text = _normalizeWhitespace(text);

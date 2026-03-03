@@ -1,26 +1,26 @@
 Pod::Spec.new do |s|
     s.name             = 'flutter_kokoro_tts'
-    s.version          = '0.0.4'
+    s.version          = '0.0.1'
     s.summary          = 'KokoroTTS - Offline text-to-speech for Flutter.'
     s.description      = <<-DESC
   High-quality offline text-to-speech using the KokoroML ONNX model with espeak-ng phonemization.
                          DESC
     s.homepage         = 'https://github.com/ikeoffiah/kokoro_tts'
     s.license          = { :file => '../LICENSE' }
-    s.author           = { 'KokoroTTS' => 'dev@example.com' }
+    s.author           = 'Pius Ikeoffiah'
     s.source           = { :path => '.' }
-  
+
     espeak_dir = 'flutter_kokoro_tts/Sources/espeak_ng'
-  
+
     s.source_files = [
       'flutter_kokoro_tts/Sources/flutter_kokoro_tts/**/*.swift',
       "#{espeak_dir}/**/*.c",
       "#{espeak_dir}/**/*.h",
     ]
-  
+
     # Only expose the bridge header to avoid duplicate header conflicts
     s.public_header_files = ["#{espeak_dir}/include/espeak_bridge.h"]
-  
+
     s.pod_target_xcconfig = {
       'DEFINES_MODULE' => 'YES',
       'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386',
@@ -44,9 +44,8 @@ Pod::Spec.new do |s|
       ].join(' '),
       'OTHER_CFLAGS' => "-w -include $(PODS_TARGET_SRCROOT)/#{espeak_dir}/config.h",
     }
-  
+
     s.dependency 'Flutter'
     s.platform = :ios, '16.0'
     s.swift_version = '5.0'
   end
-  
