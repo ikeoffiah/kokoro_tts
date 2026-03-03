@@ -49,7 +49,21 @@ class KokoroModelManager {
       return true;
     } catch (_) {
       await marker.delete();
+      await _deleteModelAndVoices(dir.path);
       return false;
+    }
+  }
+
+  /// Removes the model and voice files so [download] will re-download them.
+  Future<void> _deleteModelAndVoices(String dirPath) async {
+    final modelFile = File(p.join(dirPath, 'model_quantized.onnx'));
+    if (await modelFile.exists()) await modelFile.delete();
+
+    final voiceDir = Directory(p.join(dirPath, 'voices'));
+    if (await voiceDir.exists()) {
+      await for (final entity in voiceDir.list()) {
+        if (entity is File) await entity.delete();
+      }
     }
   }
 
