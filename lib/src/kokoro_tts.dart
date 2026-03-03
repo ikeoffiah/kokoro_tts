@@ -115,6 +115,8 @@ Future<void> initialize({
     String voice = 'Default',
     double speed = 1.0,
   }) async {
+    if (text.trim().isEmpty) return Float32List(0);
+
     await initialize();
 
     if (!availableVoices.contains(voice)) {

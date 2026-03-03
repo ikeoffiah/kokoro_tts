@@ -21,6 +21,9 @@ Pod::Spec.new do |s|
     # Only expose the bridge header to avoid duplicate header conflicts
     s.public_header_files = ["#{espeak_dir}/include/espeak_bridge.h"]
 
+    # Privacy manifest so the app bundle can satisfy App Store requirements
+    s.resources = 'flutter_kokoro_tts/Sources/flutter_kokoro_tts/PrivacyInfo.xcprivacy'
+
     s.pod_target_xcconfig = {
       'DEFINES_MODULE' => 'YES',
       'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386',

@@ -8,7 +8,6 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
-  archive: ^4.0.9
   crypto: ^3.0.7
   ffi: ^2.2.0
   flutter:
@@ -30,7 +29,8 @@ dev_dependencies:
 flutter:
   plugin:
     platforms:
-      ios: {}
+      ios:
+        pluginClass: FlutterKokoroTtsPlugin
 
   # To add assets to your package, add an assets section, like this:
   # assets:

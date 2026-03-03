@@ -7,6 +7,9 @@ class IntegrityVerifier {
     required String expectedSha256,
   }) async {
     final file = File(path);
+    if (!await file.exists()) {
+      throw Exception('File not found: $path');
+    }
 
     final digest = await sha256.bind(file.openRead()).first;
     final actual = digest.toString();
