@@ -41,7 +41,7 @@ class TextCleaner {
   }
 }
 
-/// Extension to iterate over grapheme clusters (important for multi-byte chars)
+/// Extension to iterate over by code point (rune) (important for multi-byte chars)
 extension _StringCharacters on String {
   List<String> get characters {
     final result = <String>[];
