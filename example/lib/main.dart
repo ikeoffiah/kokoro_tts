@@ -207,7 +207,7 @@ class _TtsExamplePageState extends State<TtsExamplePage> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: _selectedVoice,
+              initialValue: _selectedVoice,
               decoration: const InputDecoration(
                 labelText: 'Voice',
                 border: OutlineInputBorder(),
