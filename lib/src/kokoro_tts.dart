@@ -115,7 +115,11 @@ Future<void> initialize({
     String voice = 'Default',
     double speed = 1.0,
   }) async {
-    await initialize(); 
+    await initialize();
+
+    if (!availableVoices.contains(voice)) {
+      throw Exception('Invalid voice: $voice');
+    }
 
     final chunks = _splitIntoChunks(text);
     final parts = <Float32List>[];
