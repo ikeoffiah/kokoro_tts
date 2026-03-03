@@ -78,9 +78,9 @@ class KokoroModelManager {
       return;
     }
 
-    // Download ONNX Model
+    // Download ONNX Model (file lives under onnx/ in the repo)
     await _downloadFile(
-      url: '$_hfBase/model_quantized.onnx',
+      url: '$_hfBase/onnx/model_quantized.onnx',
       destination: p.join(dir.path, 'model_quantized.onnx'),
       onProgress: (p) => onProgress?.call(p * 0.6, 'Downloading model...'),
     );
