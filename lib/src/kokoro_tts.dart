@@ -208,9 +208,22 @@ class KokoroTts {
       return result;
     }
 
-    // -- Voice---
-    final style = await _getVoice(voice);
-    debugPrint('[kokoroTTS]: style embedding: ${style.length}');
+    // -- Voice: .bin files are (N, 256); model expects style [1, 256]. Pick row by token length.
+    const styleDim = 256;
+    final styleAll = await _getVoice(voice);
+    final numVectors = styleAll.length ~/ styleDim;
+    if (numVectors == 0) {
+      throw Exception(
+        'Voice file for "$voice" has no style vectors (expected multiple of $styleDim floats)',
+      );
+    }
+    final tokenLen = encodedTokens.length.clamp(0, numVectors - 1);
+    final style = Float32List.sublistView(
+      styleAll,
+      tokenLen * styleDim,
+      (tokenLen + 1) * styleDim,
+    );
+    debugPrint('[kokoroTTS]: style embedding: ${style.length} (row $tokenLen of $numVectors)');
 
     // -- Speed Adjustment --
     final speedFactor = _speedPriors[voice]!;
@@ -224,7 +237,7 @@ class KokoroTts {
       [1, encodedTokens.length],
     );
 
-    final styleTensor = await OrtValue.fromList(style, [1, style.length]);
+    final styleTensor = await OrtValue.fromList(style, [1, styleDim]);
 
     final speedTensor = await OrtValue.fromList([effectiveSpeed], [1]);
 
