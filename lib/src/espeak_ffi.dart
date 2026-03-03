@@ -82,7 +82,7 @@ class EspeakFfi {
     _loaded = true;
   }
 
-  // Initialize the espeak-ng library with the path to the directory cotaing the espeak-ng-data directory
+  // Initialize the espeak-ng library with the path to the directory containing the espeak-ng-data directory
   void init({required String dataPath}) {
     final pathPtr = dataPath.toNativeUtf8();
     try {
