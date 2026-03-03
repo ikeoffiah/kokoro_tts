@@ -29,7 +29,9 @@ dev_dependencies:
 flutter:
   plugin:
     platforms:
-      android: {}
+      android:
+        package: dev.piusikeoffiah.flutter_kokoro_tts
+        pluginClass: FlutterKokoroTtsPlugin
       ios:
         pluginClass: FlutterKokoroTtsPlugin
 
