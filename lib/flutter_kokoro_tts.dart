@@ -1,5 +1,4 @@
-/// A Calculator.
-class Calculator {
-  /// Returns [value] plus 1.
-  int addOne(int value) => value + 1;
-}
+/// Flutter package for Kokoro TTS (text-to-speech) using ONNX and espeak-ng.
+library;
+
+export 'src/kokoro_tts.dart';
